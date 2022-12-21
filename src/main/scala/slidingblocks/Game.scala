@@ -110,8 +110,8 @@ case class Puzzle(h: Int, w: Int, blocks: Vector[Block]) {
       m <- moves
       p = move(m) if isLegal(m)
     } yield (p, m)
-    println(this)
-    println(s"neighbors = ${x.size}")
+    //print(this)
+    //println(s"neighbors = ${x.size}")
     x
   }
 }
@@ -163,6 +163,7 @@ object Main extends App {
     )
   }
 
+  //println(miPuzzle == miPuzzle.copy(blocks = miPuzzle.blocks.updated(0, Block(Pos(0,0),2,1))))
   val s = miSolver()
   val sol = s.solution
   print(sol)

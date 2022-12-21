@@ -83,17 +83,17 @@ trait Solver:
       (puzzle, history) <- initial
       newPuzzle <- newNeighborsOnly(neighborsWithHistory(puzzle, history), explored)
     } yield newPuzzle
-    // println(s"initialsize = ${initial.size}")
-    // println(s"explsize = ${explored.size}")
-    // println(s"newsize = ${newPuzzles.size}")
+    println(s"initialsize = ${initial.size}")
+    println(s"explsize = ${explored.size}")
+    println(s"newsize = ${newPuzzles.size}")
     // println(s"diffsize = ${newPuzzles.toSet.map(_._1).size}")
     val newPuzzlesUniq = newPuzzles.toMap.to(LazyList)
-    //println(s"uniq = ${newPuzzlesUniq.size}\n")
+    println(s"uniq = ${newPuzzlesUniq.size}\n")
 
     newPuzzlesUniq.headOption match {
       case None => initial
       case _ => {
-        initial #::: newPuzzlesUniq #::: from(newPuzzlesUniq, explored ++ newPuzzlesUniq.toSet.map(_._1))
+        initial #::: from(newPuzzlesUniq, explored ++ newPuzzlesUniq.toSet.map(_._1))
       }
     }
   }
@@ -112,7 +112,9 @@ trait Solver:
     val x = pathsFromStart
     for {
       path <- pathsFromStart
-      dummy = println(path._2.size)
+      //dummy = println(path._2.size)
+      // dummy2 = if (seen.contains(path._1)) then println("Already seen") else seen += path._1
+      // dummy3 = println(s"seen = ${seen.size}")
       if (done(path._1))
     } yield path
 

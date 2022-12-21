@@ -85,7 +85,7 @@ trait Solver:
       case _ => {
 //        val x = newPuzzles.map(_._1).toSet
 //        val y = explored ++ x
-        initial ++ newPuzzles ++ from(newPuzzles, explored ++ newPuzzles.toSet.map(_._1))
+        initial #::: newPuzzles #::: from(newPuzzles, explored ++ newPuzzles.toSet.map(_._1))
       }
     }
   }

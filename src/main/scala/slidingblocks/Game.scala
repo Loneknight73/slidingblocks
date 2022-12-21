@@ -55,28 +55,27 @@ case class Block(ul: Pos, h: Int, w: Int) {
 }
 
 // Move Block with index i in blocks in the specified direction
-case class Move(bi: Int, d: Direction)
+case class Move(b: Block, d: Direction)
 
-case class Puzzle(h: Int, w: Int, blocks: Vector[Block]) {
+case class Puzzle(h: Int, w: Int, blocks: Set[Block]) {
   val nblocks = blocks.size
 
   val moves: List[Move] = {
     val l = for {
-      i <- 0 until nblocks
+      b <- blocks
       d <- Direction.values
-    } yield Move(i, d)
+    } yield Move(b, d)
     l.toList
   }
 
   override def toString(): String = {
     val v: Array[Char] = Array.fill(h*(w+1))('x')
-    val c = for {
-      i <- 0 until nblocks
-      b = blocks(i)
-      r <- b.ul.row until b.ul.row + b.h 
+    val x = for {
+      (b, i) <- blocks.zipWithIndex
+      r <- b.ul.row until b.ul.row + b.h
       c <- b.ul.col until b.ul.col + b.w    
-    } yield (i, r, c)
-    c.map((i, r, c) => v(r*(w+1) + c) = i.toString()(0))
+    } yield (r, c, i)
+    x.map( (r, c, i) => v(r * (w+1) + c) = i.toString()(0) )
     val n = for {
       r <- 1 to h
     } yield (r*(w+1)-1)
@@ -86,22 +85,21 @@ case class Puzzle(h: Int, w: Int, blocks: Vector[Block]) {
   }
 
   def isLegal(m: Move): Boolean = {
-    val newblock = blocks(m.bi).move(m.d)
+    val newblock = m.b.move(m.d)
     val inTray = (newblock.ul.row >= 0) &&
                  (newblock.ul.col >= 0) &&
                  (newblock.ul.row + newblock.h <= h) &&
                  (newblock.ul.col + newblock.w <= w)
     var r = false
     if (inTray) {
-      val x = blocks.zipWithIndex.dropWhile( (b, i) => (i == m.bi) || !newblock.overlap(b))
-      if (x.size == 0) then
-        r = true
+      val x = blocks.forall( b => (b == m.b) || !newblock.overlap(b))
+      r = x
     }
     r
   }
 
   def move(m: Move): Puzzle = {
-    val newblocks = blocks.updated(m.bi, blocks(m.bi).move(m.d))
+    val newblocks = blocks - m.b + m.b.move(m.d)
     copy(blocks = newblocks)
   }
 
@@ -121,7 +119,7 @@ object Main extends App {
   val miPuzzle: Puzzle = Puzzle(
     h = 5,
     w = 4,
-    blocks = Vector(
+    blocks = Set(
       Block(Pos(0, 0), 2, 1),
       Block(Pos(0, 3), 2, 1),
       Block(Pos(2, 0), 2, 1),
@@ -138,7 +136,7 @@ object Main extends App {
   val simplePuzzle: Puzzle = Puzzle(
        h = 5,
        w = 4,
-       blocks = Vector(
+       blocks = Set(
       Block(Pos(0, 0), 2, 1),
       Block(Pos(0, 3), 2, 1),
       Block(Pos(2, 0), 2, 1),
@@ -166,5 +164,6 @@ object Main extends App {
   //println(miPuzzle == miPuzzle.copy(blocks = miPuzzle.blocks.updated(0, Block(Pos(0,0),2,1))))
   val s = miSolver()
   val sol = s.solution
-  print(sol)
+  println(s"Found solution with length ${sol.size}")
+  sol.map(println(_))
 }

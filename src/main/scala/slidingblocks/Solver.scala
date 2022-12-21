@@ -86,13 +86,13 @@ trait Solver:
     println(s"initialsize = ${initial.size}")
     println(s"explsize = ${explored.size}")
     println(s"newsize = ${newPuzzles.size}")
-    // println(s"diffsize = ${newPuzzles.toSet.map(_._1).size}")
     val newPuzzlesUniq = newPuzzles.toMap.to(LazyList)
     println(s"uniq = ${newPuzzlesUniq.size}\n")
 
     newPuzzlesUniq.headOption match {
       case None => initial
-      case _ => {
+      case Some(x) => {
+        //println(s"Number of moves = ${x._2.size}")
         initial #::: from(newPuzzlesUniq, explored ++ newPuzzlesUniq.toSet.map(_._1))
       }
     }

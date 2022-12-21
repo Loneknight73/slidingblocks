@@ -1,5 +1,7 @@
 package slidingblocks
 
+import scala.collection.mutable
+
 /**
  * The case class `Pos` encodes positions in the terrain.
  *
@@ -66,6 +68,23 @@ case class Puzzle(h: Int, w: Int, blocks: Vector[Block]) {
     l.toList
   }
 
+  override def toString(): String = {
+    val v: Array[Char] = Array.fill(h*(w+1))('x')
+    val c = for {
+      i <- 0 until nblocks
+      b = blocks(i)
+      r <- b.ul.row until b.ul.row + b.h 
+      c <- b.ul.col until b.ul.col + b.w    
+    } yield (i, r, c)
+    c.map((i, r, c) => v(r*(w+1) + c) = i.toString()(0))
+    val n = for {
+      r <- 1 to h
+    } yield (r*(w+1)-1)
+    n.map(p => v(p) = '\n')
+    val s: String = v.mkString
+    s
+  }
+
   def isLegal(m: Move): Boolean = {
     val newblock = blocks(m.bi).move(m.d)
     val inTray = (newblock.ul.row >= 0) &&
@@ -74,7 +93,7 @@ case class Puzzle(h: Int, w: Int, blocks: Vector[Block]) {
                  (newblock.ul.col + newblock.w <= w)
     var r = false
     if (inTray) {
-      val x = blocks.zipWithIndex.dropWhile( (b, i) => i == m.bi || !newblock.overlap(b))
+      val x = blocks.zipWithIndex.dropWhile( (b, i) => (i == m.bi) || !newblock.overlap(b))
       if (x.size == 0) then
         r = true
     }
@@ -87,13 +106,16 @@ case class Puzzle(h: Int, w: Int, blocks: Vector[Block]) {
   }
 
   def legalNeighbors: List[(Puzzle, Move)] = {
-    for {
+    val x = for {
       m <- moves
       p = move(m) if isLegal(m)
     } yield (p, m)
+    println(this)
+    println(s"neighbors = ${x.size}")
+    x
   }
 }
-
+  
 object Main extends App {
 
   val miPuzzle: Puzzle = Puzzle(
@@ -113,6 +135,23 @@ object Main extends App {
     )
   )
 
+  val simplePuzzle: Puzzle = Puzzle(
+       h = 5,
+       w = 4,
+       blocks = Vector(
+      Block(Pos(0, 0), 2, 1),
+      Block(Pos(0, 3), 2, 1),
+      Block(Pos(2, 0), 2, 1),
+      Block(Pos(2, 3), 2, 1),
+      Block(Pos(1, 1), 2, 2),     
+      Block(Pos(3, 1), 1, 2),
+      Block(Pos(4, 0), 1, 1),
+      //Block(Pos(4, 1), 1, 1),
+      //Block(Pos(4, 2), 1, 1),
+      Block(Pos(4, 3), 1, 1)
+    )
+  )
+
 //  val n = miPuzzle.legalNeighbors
 //  println(n)
 //  println(n.size)
@@ -125,5 +164,6 @@ object Main extends App {
   }
 
   val s = miSolver()
-  print(s.solution)
+  val sol = s.solution
+  print(sol)
 }

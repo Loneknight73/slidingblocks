@@ -7,12 +7,17 @@ trait Solver:
 
   val startPuzzle: Puzzle
   val goal: List[Block]
+  var seen: Set[Puzzle] = Set.empty
 
   /**
    * Returns `true` if the block `b` is at the final position
    */
   def done(p: Puzzle): Boolean =
-    println(p)
+    //println(p)
+    // if (seen.contains(p)) then
+    //   println("Already seen")
+    // seen += p
+    // println(s"seen = ${seen.size}")
     val x = goal.dropWhile(g => p.blocks.contains(g))
     x.size == 0
 
@@ -78,14 +83,17 @@ trait Solver:
       (puzzle, history) <- initial
       newPuzzle <- newNeighborsOnly(neighborsWithHistory(puzzle, history), explored)
     } yield newPuzzle
-//    println(s"newsize = ${newPuzzles.size}")
-//    println(s"expsize = ${explored.size}")
-    newPuzzles.headOption match {
+    // println(s"initialsize = ${initial.size}")
+    // println(s"explsize = ${explored.size}")
+    // println(s"newsize = ${newPuzzles.size}")
+    // println(s"diffsize = ${newPuzzles.toSet.map(_._1).size}")
+    val newPuzzlesUniq = newPuzzles.toMap.to(LazyList)
+    //println(s"uniq = ${newPuzzlesUniq.size}\n")
+
+    newPuzzlesUniq.headOption match {
       case None => initial
       case _ => {
-//        val x = newPuzzles.map(_._1).toSet
-//        val y = explored ++ x
-        initial #::: newPuzzles #::: from(newPuzzles, explored ++ newPuzzles.toSet.map(_._1))
+        initial #::: newPuzzlesUniq #::: from(newPuzzlesUniq, explored ++ newPuzzlesUniq.toSet.map(_._1))
       }
     }
   }
@@ -104,6 +112,7 @@ trait Solver:
     val x = pathsFromStart
     for {
       path <- pathsFromStart
+      dummy = println(path._2.size)
       if (done(path._1))
     } yield path
 
